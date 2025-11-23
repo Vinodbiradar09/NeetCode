@@ -1,0 +1,11 @@
+FROM node:20-alpine
+WORKDIR /app
+COPY wss/package*json ./
+RUN npm install
+COPY wss ./
+COPY worker/dist/consumer.js ./worker/dist/consumer.js
+RUN npm install -g typescript
+RUN npx tsc 
+EXPOSE 8081
+CMD [ "node" , "dist/ws.js" ]
+
