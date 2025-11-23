@@ -1,0 +1,114 @@
+"use client";
+import { use, useEffect, useState } from "react";
+import axios from "axios";
+import CodeEditor from "@/components/Editor";
+import ProblemPanel from "@/components/ProblemPanel";
+import { ProblemInt } from "@/app/problems/page";
+import { connectionWs } from "@/lib/ws";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import LanguageSelector from "@/components/LanguageSelector";
+
+export enum Languages {
+  JavaScript = "JavaScript",
+  Rust = "Rust",
+  GoLang = "GoLang",
+}
+
+export default function SolvePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = use(params);
+
+  const userId = "272ed251-4a19-4821-bd36-3c54b753a7c6";
+
+  const [problem, setProblem] = useState<ProblemInt | null>(null);
+  const [code, setCode] = useState("console.log('hello')");
+  const [lang, setLang] = useState<Languages>(Languages.JavaScript);
+  const [result, setResult] = useState("");
+  useEffect(() => {
+    const load = async () => {
+      const res = await axios.get(`http://localhost:3005/api/problems/${slug}`);
+      setProblem(res.data.problem);
+    };
+    load();
+  }, [slug]);
+  useEffect(() => {
+    const ws = connectionWs(userId);
+
+    ws.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+
+        if (msg.type === "submission-result") {
+          setResult(JSON.stringify(msg.data.output, null, 2));
+        } else {
+          setResult(JSON.stringify(msg.data.error, null, 2));
+        }
+      } catch {
+        console.log("Non-JSON message:", e.data);
+      }
+    };
+  }, [userId]);
+  const submit = async () => {
+    const res = await axios.post("http://localhost:3005/api/submissions", {
+      userId,
+      problemId: slug,
+      lang,
+      code,
+    });
+    console.log(res.data);
+  };
+
+  if (!problem) return <p className="p-10 text-center">Loading...</p>;
+
+  return (
+    <div className="flex flex-col h-screen bg-black text-white">
+      <div className="w-full border-b border-neutral-800 py-3 flex justify-center items-center bg-neutral-950">
+        <div className="w-10 h-10 rounded-md bg-linear-to-br from-cyan-400 to-cyan-600 flex items-center justify-center m-3">
+          <span className="font-bold text-black">NC</span>
+        </div>
+        <div className="text-4xl font-semibold">NeetCode</div>
+      </div>
+
+      <div className="flex flex-1 overflow-hidden">
+        <ProblemPanel
+          problem={problem}
+          lang={lang}
+          setLang={setLang}
+          submit={submit}
+          result={result}
+        />
+        <div className="flex-1 flex flex-col bg-black">
+          <div className="flex justify-start items-center p-3 pr-5 border-b border-neutral-800 bg-neutral-950">
+            <LanguageSelector value={lang} onChange={setLang} />
+            <Button
+              onClick={submit}
+              className="border border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black  px-6 h-10 mx-5 cursor-pointer"
+            >
+              Submit Code
+            </Button>
+
+            <Link
+              href="/problems"
+              className="border border-cyan-400 text-cyan-400 hover:bg-cyan-400 hover:text-black px-6 py-2 rounded-md"
+            >
+              Open Problems
+            </Link>
+          </div>
+          <div className="flex-1 p-4 flex flex-col">
+            <div className="flex-1 rounded-xl overflow-hidden border border-neutral-800 m-5 flex flex-col">
+              <CodeEditor code={code} onChange={setCode} lang={lang} />
+            </div>
+
+            <div className="text-neutral-500 text-sm py-3 flex items-center justify-center">
+              © All Rights Reserved to NeetCode
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
