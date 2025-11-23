@@ -1,4 +1,4 @@
-import express, { json } from "express";
+import express from "express";
 import WebSocket , {WebSocketServer} from "ws";
 import { redis } from "../../worker/dist/consumer.js";
 
