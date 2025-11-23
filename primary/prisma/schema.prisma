@@ -1,0 +1,91 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String     @id @default(uuid())
+  email         String     @unique
+  password      String
+  // Auth.js fields
+  emailVerified DateTime?  
+  accounts      Account[]
+  sessions      Session[]
+
+  // Your domain relations
+  submissions CodeDetails[]
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?
+  access_token       String?
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Problem {
+  id          String       @id @default(uuid())
+  title       String
+  description String
+  examples    String?
+  submissions CodeDetails[]
+}
+
+model CodeDetails {
+  id        String    @id @default(uuid())
+  lang      Languages
+  code      String
+  status    Status
+  output    String?
+  error     String?
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  problemId String
+  problem   Problem   @relation(fields: [problemId], references: [id])
+}
+
+enum Languages {
+  JavaScript
+  Rust
+  GoLang
+}
+
+enum Status {
+  Tle
+  Success
+  Fail
+}
