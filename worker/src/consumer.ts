@@ -116,7 +116,7 @@ async function pickJob() {
 
       await redis.publish(
         "submission-results",
-        JSON.stringify({ problemId, userId, res })
+        JSON.stringify({ problemId, userId, status , output : res.output , error : res.error})
       );
 
       channel.ack(msg);

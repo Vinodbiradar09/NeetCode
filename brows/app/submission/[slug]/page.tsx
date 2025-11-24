@@ -35,23 +35,36 @@ export default function SolvePage({
     };
     load();
   }, [slug]);
+
   useEffect(() => {
     const ws = connectionWs(userId);
 
     ws.onmessage = (e) => {
       try {
+        console.log("hiiiiiii" , JSON.parse(e.data));
         const msg = JSON.parse(e.data);
-
-        if (msg.type === "submission-result") {
-          setResult(JSON.stringify(msg.data.output, null, 2));
+        const { output, error, status } = msg;
+        if (msg.type !== "submission-result") return;
+        if (status === "Success") {
+          setResult(JSON.stringify(output, null, 2));
+          console.log("hfhfhf" , JSON.stringify(output));
+          console.log("reasss" ,result);
+        } else if (status === "Tle"){
+          setResult("Time Limit Exceeded");
         } else {
-          setResult(JSON.stringify(msg.data.error, null, 2));
+           setResult(JSON.stringify(error, null, 2));
         }
       } catch {
         console.log("Non-JSON message:", e.data);
       }
     };
   }, [userId]);
+  
+  useEffect(() => {
+  console.log("UI result updated:", result);
+}, [result]);
+
+
   const submit = async () => {
     const res = await axios.post("http://localhost:3005/api/submissions", {
       userId,

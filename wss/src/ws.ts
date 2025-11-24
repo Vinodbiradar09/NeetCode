@@ -48,16 +48,13 @@ redis.on("message" , (channel , message)=>{
     console.log("channel and message" , channel , message);
     try {
         const parsed = JSON.parse(message);
-        const {problemId, userId, res } = parsed;
-        if(!userId || !res || !problemId){
-            return null;
-        }
+        const {problemId, userId, status , output , error } = parsed;
         const ws = clients.get(userId);
         if(!ws || ws.readyState !== WebSocket.OPEN){
             console.log("client is not online");
             return "client is not online";
         }
-        ws.send(JSON.stringify({type : "submission-result" , userId , problemId , data : res}));
+        ws.send(JSON.stringify({type : "submission-result" , userId , problemId , output , error , status}));
     } catch (error) {
         console.log("failed to parse redis message");
     }

@@ -35,7 +35,7 @@ export default function ProblemPanel({
         <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-4">
           <h2 className="font-bold mb-2">Result</h2>
           <pre className="whitespace-pre-wrap text-green-400">
-            {result}
+            {result || "No results yet"}
           </pre>
         </div>
       </div>
