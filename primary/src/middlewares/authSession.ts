@@ -1,17 +1,36 @@
-import { getSession } from "@auth/express";
-import type { Request, Response, NextFunction } from "express";
-import { authConfig } from "../auth/auth.js";
+import jwt, { type JwtPayload } from "jsonwebtoken";
+import "dotenv/config";
+import type { NextFunction, Request, Response } from "express";
+import { prisma } from "../prismadb.js";
 
-export const authSession = async (req: Request, res: Response, next: NextFunction) => {
+const jwtVerify = async(req : Request , res : Response , next : NextFunction)=>{
   try {
-    console.log("cookies" , req.headers.cookie);
-    const session = await getSession(req, authConfig);
-    res.locals.session = session;
-    
-  } catch (err) {
-    console.error("authSession error:", err);
-    res.locals.session = null;
+    const token = req.cookies?.accessToken;
+    if(!token) return res.status(401).json({ message: "Unauthorized" , success : false });
+    const decode = jwt.verify(token , process.env.ACCESS_TOKEN_SECRET!) as JwtPayload
+    if (!decode) {
+      return res.status(402).json({
+        message: "Token Decode Failed",
+        success: false,
+      });
+    }
+    const user = await prisma.user.findUnique({
+      where : {
+        id : decode.id,
+      }
+    });
+    if(!user){
+      return res.status(404).json({
+        message: "User not found while decoding Token",
+        success: false,
+      });
+    }
+    req.user = user;
+    next();
+  } catch (error) {
+    console.log("error in authmiddleware", error);
+    return res.status(403).json({ message: "Invalid token" });
   }
-  next();
-};
+}
 
+export {jwtVerify};

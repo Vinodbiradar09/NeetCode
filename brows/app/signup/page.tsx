@@ -8,6 +8,7 @@ import axios from "axios";
 export default function User() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
+  const [name, setName] = useState<string>("");
   const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -17,15 +18,21 @@ export default function User() {
     try {
       setLoading(true);
       setErrorMsg(null);
-      const res = await axios.post("http://localhost:3005/api/users", {
-        email,
-        password,
-      },{withCredentials : true});
+      const res = await axios.post(
+        "http://localhost:3005/api/users/signup",
+        {
+          email,
+          password,
+          name,
+        },
+        { withCredentials: true }
+      );
       if (res.data) {
         setUserId(res.data.userId);
         setEmail("");
         setPassword("");
-        console.log("user" ,userId);
+        setName("");
+        console.log("user", userId);
         router.push("/login");
       } else {
         router.push("/");
@@ -39,25 +46,34 @@ export default function User() {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-black text-white antialiased flex items-center justify-center">
       <div className="w-full max-w-md px-6">
         <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-extrabold">Create Your NeetCode Account</h1>
-              <p className="text-xs text-neutral-400 mt-1">Quickly create a account to start solving.</p>
+              <h1 className="text-2xl font-extrabold">
+                Create Your NeetCode Account
+              </h1>
+              <p className="text-xs text-neutral-400 mt-1">
+                Quickly create a account to start solving.
+              </p>
             </div>
-            <div className="hidden sm:flex items-center gap-2 text-xs text-neutral-500">
-             
-            </div>
+            <div className="hidden sm:flex items-center gap-2 text-xs text-neutral-500"></div>
           </div>
 
           <div className="space-y-3">
+            <label className="text-xs text-neutral-400 mt-2">Name</label>
+            <Input
+              placeholder="Name"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="bg-neutral-800 text-white placeholder:text-neutral-500 rounded-md"
+            />
             <label className="text-xs text-neutral-400">Email</label>
             <Input
-              placeholder="you@example.com"
+              placeholder="Email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}

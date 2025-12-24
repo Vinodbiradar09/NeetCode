@@ -15,31 +15,29 @@ export default function User() {
 
   const sendReq = async () => {
     try {
-        const csrfRes = await axios.get("http://localhost:3005/auth/csrf", {
-            withCredentials : true,
-        });
-        const csrfToken = csrfRes.data.csrfToken;
       setLoading(true);
       setErrorMsg(null);
-      const res = await axios.post("http://localhost:3005/auth/signin", {
+      const res = await axios.post("http://localhost:3005/api/users/signin", {
         email,
         password,
-        csrfToken,
       },{withCredentials : true});
       if (res.data) {
         setUserId(res.data.userId);
         setEmail("");
         setPassword("");
-        console.log("userId" , userId);
+        console.log("user" ,userId);
+        router.push("/");
+      } else {
         router.push("/problems");
+        setErrorMsg(res.data.message);
       }
     } catch (error) {
       console.log("error in creating the user", error);
+      setErrorMsg("Account creation failed");
     } finally {
       setLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen bg-black text-white antialiased flex items-center justify-center">
@@ -47,12 +45,14 @@ export default function User() {
         <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-2xl font-extrabold">Login to you NeetCode Account</h1>
-              <p className="text-xs text-neutral-400 mt-1">Quickly Login and start solving.</p>
+              <h1 className="text-2xl font-extrabold">
+                Login to you NeetCode Account
+              </h1>
+              <p className="text-xs text-neutral-400 mt-1">
+                Quickly Login and start solving.
+              </p>
             </div>
-            <div className="hidden sm:flex items-center gap-2 text-xs text-neutral-500">
-             
-            </div>
+            <div className="hidden sm:flex items-center gap-2 text-xs text-neutral-500"></div>
           </div>
 
           <div className="space-y-3">

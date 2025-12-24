@@ -19,7 +19,7 @@ export default function CreateProblem() {
         title,
         description,
         examples,
-      });
+      },{withCredentials : true});
       if (res.data) {
         setTitle("");
         setDescription("");
