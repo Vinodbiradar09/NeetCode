@@ -69,7 +69,7 @@ export const userController = {
       }
       return res
         .status(200)
-        .json({ message: "current logged user accessed", success: true, sanitizedUser });
+        .json({ message: "current logged user accessed", success: true, user : sanitizedUser });
     } catch (error) {
       console.log("failed to access the current logged user", error);
       return res.status(500).json({

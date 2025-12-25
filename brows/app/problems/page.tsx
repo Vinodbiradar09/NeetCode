@@ -54,7 +54,7 @@ export default function AllProblems() {
             <div className="text-center text-neutral-400">Loading problems...</div>
           )}
 
-          {!loading && problems.length === 0 && (
+          {!loading && problems?.length === 0 && (
             <div className="text-center text-neutral-400">
               No problems found.{" "}
               <Link
@@ -67,7 +67,7 @@ export default function AllProblems() {
           )}
 
           {!loading &&
-            problems.map((prob, index) => (
+            problems?.map((prob, index) => (
               <Link
                 key={prob.id}
                 href={`/submission/${prob.id}`}

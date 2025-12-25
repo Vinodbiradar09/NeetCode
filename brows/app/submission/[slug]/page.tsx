@@ -15,6 +15,13 @@ export enum Languages {
   GoLang = "GoLang",
 }
 
+ export interface User {
+  id : string,
+  email : string,
+  name : string,
+  createdAt : string,
+ }
+
 export default function SolvePage({
   params,
 }: {
@@ -22,9 +29,8 @@ export default function SolvePage({
 }) {
   const { slug } = use(params);
 
-  const userId = "272ed251-4a19-4821-bd36-3c54b753a7c6";
-
   const [problem, setProblem] = useState<ProblemInt | null>(null);
+  const [ user , setUser] = useState<User | null>(null);
   const [code, setCode] = useState("console.log('hello')");
   const [lang, setLang] = useState<Languages>(Languages.JavaScript);
   const [result, setResult] = useState("");
@@ -33,11 +39,23 @@ export default function SolvePage({
       const res = await axios.get(`http://localhost:3005/api/problems/${slug}`);
       setProblem(res.data.problem);
     };
-    load();
-  }, [slug]);
+    const loadUser = async()=>{
+      const res = await axios.get('http://localhost:3005/api/users/me' , {withCredentials : true});
+      setUser(res.data.user);
+      console.log("the user is " ,user);
+    }
+    const Prom = async()=>{
+      const [p1 , p2] =  await Promise.all([load , loadUser]);
+      console.log("p1" , p1);
+      console.log("p2" , p2);
+    }
+
+    Prom();
+  }, [slug , user]);
 
   useEffect(() => {
-    const ws = connectionWs(userId);
+    if(!user?.id) return 
+    const ws = connectionWs(user?.id);
 
     ws.onmessage = (e) => {
       try {
@@ -58,7 +76,7 @@ export default function SolvePage({
         console.log("Non-JSON message:", e.data);
       }
     };
-  }, [userId]);
+  }, [user?.id , result]);
   
   useEffect(() => {
   console.log("UI result updated:", result);
@@ -67,7 +85,7 @@ export default function SolvePage({
 
   const submit = async () => {
     const res = await axios.post("http://localhost:3005/api/submissions", {
-      userId,
+      userId : user?.id,
       problemId: slug,
       lang,
       code,

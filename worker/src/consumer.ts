@@ -5,7 +5,12 @@ import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";
 
-export const redis = new Redis();
+export const redis = new Redis({
+  port : 6378,
+  host: "127.0.0.1",
+  username: "default",
+  password: "my-top-secret",
+});
 
 const imageMap: any = {
   JavaScript: "node:20",

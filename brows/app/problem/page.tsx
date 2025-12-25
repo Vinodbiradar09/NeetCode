@@ -24,7 +24,7 @@ export default function CreateProblem() {
         setTitle("");
         setDescription("");
         setExamples("");
-        console.log("Problem created:", res.data.problem.id);
+        console.log("Problem created:", res.data);
       }
     } catch (error) {
       console.log("Error creating problem", error);
