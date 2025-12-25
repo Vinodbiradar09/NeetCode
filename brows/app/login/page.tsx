@@ -8,7 +8,6 @@ import axios from "axios";
 export default function User() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
-  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const router = useRouter();
@@ -22,13 +21,13 @@ export default function User() {
         password,
       },{withCredentials : true});
       if (res.data) {
-        setUserId(res.data.userId);
-        setEmail("");
-        setPassword("");
-        console.log("user" ,userId);
-        router.push("/");
+        if(res.data.user.id){
+          setEmail("");
+          setPassword("");
+          router.push("/problems");
+        }
       } else {
-        router.push("/problems");
+        router.push("/login");
         setErrorMsg(res.data.message);
       }
     } catch (error) {

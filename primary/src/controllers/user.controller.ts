@@ -14,9 +14,15 @@ export const userController = {
         });
       }
       const user = await userService.createUser(email, password, name);
+      const sanitizedUser = {
+        id : user.id,
+        name : user.name,
+        email : user.email,
+        createdAt : user.createdAt
+      }
       res.status(201).json({
         success: true,
-        userId: user.id,
+        user : sanitizedUser,
         message: "Account created successfully",
       });
     } catch (err) {

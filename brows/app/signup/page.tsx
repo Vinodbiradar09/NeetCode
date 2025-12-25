@@ -9,7 +9,6 @@ export default function User() {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [name, setName] = useState<string>("");
-  const [userId, setUserId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const router = useRouter();
@@ -28,11 +27,9 @@ export default function User() {
         { withCredentials: true }
       );
       if (res.data) {
-        setUserId(res.data.userId);
         setEmail("");
         setPassword("");
         setName("");
-        console.log("user", userId);
         router.push("/login");
       } else {
         router.push("/");
