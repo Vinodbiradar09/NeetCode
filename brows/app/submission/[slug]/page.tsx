@@ -8,6 +8,7 @@ import { connectionWs } from "@/lib/ws";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import LanguageSelector from "@/components/LanguageSelector";
+import { useAuth } from "@/app/providers/AuthProvider";
 
 export enum Languages {
   JavaScript = "JavaScript",
@@ -28,30 +29,18 @@ export default function SolvePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = use(params);
-
+  const {user , loading} = useAuth();
   const [problem, setProblem] = useState<ProblemInt | null>(null);
-  const [ user , setUser] = useState<User | null>(null);
   const [code, setCode] = useState("console.log('hello')");
   const [lang, setLang] = useState<Languages>(Languages.JavaScript);
   const [result, setResult] = useState("");
   useEffect(() => {
     const load = async () => {
-      const res = await axios.get(`http://localhost:3005/api/problems/${slug}`);
+      const res = await axios.get(`http://localhost:3005/api/problems/${slug}` , {withCredentials : true});
       setProblem(res.data.problem);
     };
-    const loadUser = async()=>{
-      const res = await axios.get('http://localhost:3005/api/users/me' , {withCredentials : true});
-      setUser(res.data.user);
-      console.log("the user is " ,user);
-    }
-    const Prom = async()=>{
-      const [p1 , p2] =  await Promise.all([load , loadUser]);
-      console.log("p1" , p1);
-      console.log("p2" , p2);
-    }
-
-    Prom();
-  }, [slug , user]);
+    load();
+  }, [slug]);
 
   useEffect(() => {
     if(!user?.id) return 
@@ -85,11 +74,10 @@ export default function SolvePage({
 
   const submit = async () => {
     const res = await axios.post("http://localhost:3005/api/submissions", {
-      userId : user?.id,
       problemId: slug,
       lang,
       code,
-    });
+    } ,{withCredentials : true});
     console.log(res.data);
   };
 

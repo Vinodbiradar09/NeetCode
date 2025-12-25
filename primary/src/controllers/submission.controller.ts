@@ -4,7 +4,8 @@ import { submissionService } from "../services/submission.service.js";
 export const submissionController = {
   async submit(req: Request, res: Response, next: NextFunction) {
     try {
-      const { problemId, lang, code , userId } = req.body;
+      const userId = req.user?.id;
+      const { problemId, lang, code } = req.body;
       console.log("userId" , userId);
       if (!userId) {
         return res.status(401).json({ success: false, message: "Not authenticated" });
